@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Roster Generator - Police Roster & Workload System{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <h1 class="app-title">Automated Roster Generator</h1>
+    <p class="app-subtitle">Rule-based duty scheduling algorithm with hard constraint filtering and soft penalty candidate ordering</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-navy text-white py-3" style="background-color: #24364B;">
+                <h6 class="m-0 text-white"><i class="fa-solid fa-gears me-2"></i> Scheduling Parameters</h6>
+            </div>
+            <div class="card-body p-4 bg-white">
+                <form method="POST" action="{{ url_for('supervisor.generate_roster') }}">
+                    <div class="mb-3">
+                        <label for="start_date" class="form-label font-weight-bold">Roster Start Date *</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ default_start_date }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="horizon_days" class="form-label font-weight-bold">Planning Horizon Duration *</label>
+                        <select class="form-select" id="horizon_days" name="horizon_days">
+                            <option value="7" selected>7 Days (1 Week Horizon)</option>
+                            <option value="14">14 Days (2 Weeks Horizon)</option>
+                        </select>
+                    </div>
+
+                    <div class="alert alert-light border p-3 small mb-4">
+                        <strong class="text-navy d-block mb-1"><i class="fa-solid fa-circle-info text-primary me-1"></i> Execution Rules:</strong>
+                        <ul class="ps-3 mb-0">
+                            <li>Enforces 11h rest period, approved leave, single daily assignment, 48h weekly limit, and max 6 consecutive days.</li>
+                            <li>Scores candidates by workload accumulation, consecutive days, night shifts, and emergency duties.</li>
+                            <li>Detects staffing shortfalls without crashing.</li>
+                            <li>Runs predictive workload simulation for supervisor draft review.</li>
+                        </ul>
+                    </div>
+
+                    <button type="submit" class="btn btn-police-primary w-100 py-2">
+                        <i class="fa-solid fa-play me-2"></i> Generate Roster
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Operations Dashboard - Police Roster & Workload System{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="app-title">Operations Dashboard</h1>
+            <p class="app-subtitle">Current staffing, roster and workload overview</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('supervisor.generate_roster') }}" class="btn btn-police-primary btn-sm"><i class="fa-solid fa-calendar-plus me-1"></i> Generate Roster</a>
+            <a href="{{ url_for('supervisor.leave_management') }}" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-plane-departure me-1"></i> Review Leave ({% if pending_leaves_count > 0 %}<span class="badge bg-warning text-dark">{{ pending_leaves_count }}</span>{% else %}0{% endif %})</a>
+        </div>
+    </div>
+</div>
+
+<!-- Compact Metric Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-2">
+        <div class="card-metric">
+            <div class="metric-label">Active Officers</div>
+            <div class="metric-value">{{ active_officers }}</div>
+            <small class="text-muted">Available</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card-metric">
+            <div class="metric-label">Approved Leave</div>
+            <div class="metric-value text-warning">{{ officers_on_leave }}</div>
+            <small class="text-muted">Unavailable Today</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card-metric">
+            <div class="metric-label">High Risk</div>
+            <div class="metric-value text-danger">{{ high_risk_count }}</div>
+            <small class="text-muted">High Workload</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card-metric">
+            <div class="metric-label">Critical Risk</div>
+            <div class="metric-value text-danger" style="color: #A94442 !important;">{{ critical_risk_count }}</div>
+            <small class="text-muted">Review Required</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card-metric">
+            <div class="metric-label">Total Overtime</div>
+            <div class="metric-value">{{ "%.1f"|format(total_overtime) }}h</div>
+            <small class="text-muted">Last 7 Days</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card-metric">
+            <div class="metric-label">Pending Leave</div>
+            <div class="metric-value">{{ pending_leaves_count }}</div>
+            <small class="text-muted">Awaiting Action</small>
+        </div>
+    </div>
+</div>
+
+<!-- Concise Operational Alert -->
+{% if high_risk_officers %}
+<div class="alert alert-warning border shadow-sm mb-4" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="fa-solid fa-circle-exclamation me-3 text-warning fs-5"></i>
+        <div>
+            <strong class="me-2">Operational Attention:</strong>
+            <span class="small">{{ high_risk_officers|length }} officer(s) currently require operational workload review.</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4 mb-4">
+    <!-- Chart.js Risk Level Breakdown -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="m-0 font-weight-bold text-navy">Workload Risk Distribution</h6>
+            </div>
+            <div class="card-body p-3">
+                <canvas id="riskDistributionChart"
+                        data-low="{{ low_risk_count }}"
+                        data-moderate="{{ moderate_risk_count }}"
+                        data-high="{{ high_risk_count }}"
+                        data-critical="{{ critical_risk_count }}">
+                </canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Roster Table -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-navy">Upcoming Duty Roster (Published)</h6>
+                <a href="{{ url_for('supervisor.review_roster') }}" class="btn btn-sm btn-outline-secondary">View Roster Grid</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-police align-middle m-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Shift</th>
+                                <th>Officer</th>
+                                <th>Badge #</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if upcoming_shifts %}
+                                {% for asgn in upcoming_shifts %}
+                                <tr>
+                                    <td>{{ asgn.date.strftime('%d %b %Y') }}</td>
+                                    <td><span class="badge bg-light text-dark border">{{ asgn.shift.name }}</span></td>
+                                    <td>{{ asgn.officer.full_name }}</td>
+                                    <td><code>{{ asgn.officer.badge_number }}</code></td>
+                                    <td><span class="badge bg-primary">PUBLISHED</span></td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">No published shift assignments for upcoming days. Click "Generate Roster" to schedule shifts.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- High & Critical Risk Officers Detail List -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-bottom py-3">
+        <h6 class="m-0 font-weight-bold text-navy">Officers Requiring Workload Review</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-police align-middle m-0">
+                <thead>
+                    <tr>
+                        <th>Badge #</th>
+                        <th>Officer Name</th>
+                        <th>Rank</th>
+                        <th>Total Hours (7d)</th>
+                        <th>Consecutive Days</th>
+                        <th>Night Shifts</th>
+                        <th>Emergency Duties</th>
+                        <th>Risk Level</th>
+                        <th>Operational Reasoning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in high_risk_officers %}
+                    <tr>
+                        <td><strong>{{ a.officer.badge_number }}</strong></td>
+                        <td>{{ a.officer.full_name }}</td>
+                        <td>{{ a.officer.rank }}</td>
+                        <td>{{ "%.1f"|format(a.total_hours) }}h</td>
+                        <td>{{ a.consecutive_days }}d</td>
+                        <td>{{ a.night_shifts_count }}</td>
+                        <td>{{ a.emergency_duties_count }}</td>
+                        <td><span class="badge {{ a.risk_level|risk_badge_class }}">{{ a.risk_level }}</span></td>
+                        <td><small class="text-muted">{{ a.reasoning }}</small></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">No officers currently exceed high operational workload thresholds.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

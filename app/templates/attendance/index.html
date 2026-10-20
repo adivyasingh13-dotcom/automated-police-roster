@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance & Overtime Log - Police Roster System{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="app-title"><i class="fa-solid fa-user-check text-navy me-2"></i> Attendance & Overtime Log</h1>
+            <p class="app-subtitle">Log check-in/check-out timestamps, actual working hours, and calculated overtime</p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-police-primary btn-sm" data-bs-toggle="modal" data-bs-target="#logAttendanceModal">
+                <i class="fa-solid fa-plus me-1"></i> Log Attendance Entry
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Attendance Records Table -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-bottom py-3">
+        <h6 class="m-0 font-weight-bold text-navy"><i class="fa-solid fa-clipboard-user me-2"></i> Attendance Log for {{ selected_date }}</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-police align-middle m-0">
+                <thead>
+                    <tr>
+                        <th>Officer Name</th>
+                        <th>Badge #</th>
+                        <th>Date</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                        <th>Working Hours</th>
+                        <th>Overtime</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in records %}
+                    <tr>
+                        <td><strong>{{ rec.officer.full_name }}</strong></td>
+                        <td><code>{{ rec.officer.badge_number }}</code></td>
+                        <td>{{ rec.date.strftime('%d %b %Y') }}</td>
+                        <td>{{ rec.check_in.strftime('%H:%M') if rec.check_in else 'N/A' }}</td>
+                        <td>{{ rec.check_out.strftime('%H:%M') if rec.check_out else 'N/A' }}</td>
+                        <td>{{ "%.1f"|format(rec.working_hours or 0.0) }}h</td>
+                        <td>
+                            {% if rec.overtime_hours > 0 %}
+                                <span class="badge bg-warning text-dark">+{{ "%.1f"|format(rec.overtime_hours) }}h</span>
+                            {% else %}
+                                0.0h
+                            {% endif %}
+                        </td>
+                        <td><span class="badge {{ rec.status|status_badge_class }}">{{ rec.status }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">No attendance entries logged for {{ selected_date }}.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Log Attendance Modal -->
+<div class="modal fade" id="logAttendanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-navy text-white" style="background-color: #243447;">
+                <h5 class="modal-title text-white"><i class="fa-solid fa-user-check me-2"></i> Record Officer Attendance</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('attendance.log_attendance') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="officer_id" class="form-label font-weight-bold">Select Officer *</label>
+                        <select class="form-select" id="officer_id" name="officer_id" required>
+                            <option value="">-- Choose Officer --</option>
+                            {% for off in officers %}
+                            <option value="{{ off.id }}">{{ off.full_name }} (Badge: {{ off.badge_number }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="date" class="form-label font-weight-bold">Date *</label>
+                        <input type="date" class="form-control" id="date" name="date" value="{{ selected_date }}" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label for="check_in" class="form-label font-weight-bold">Check In Time</label>
+                            <input type="time" class="form-control" id="check_in" name="check_in">
+                        </div>
+                        <div class="col-6">
+                            <label for="check_out" class="form-label font-weight-bold">Check Out Time</label>
+                            <input type="time" class="form-control" id="check_out" name="check_out">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="status" class="form-label font-weight-bold">Attendance Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="PRESENT" selected>PRESENT</option>
+                            <option value="LATE">LATE</option>
+                            <option value="ABSENT">ABSENT</option>
+                            <option value="ON_LEAVE">ON LEAVE</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-police-primary"><i class="fa-solid fa-check me-1"></i> Save Attendance Log</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

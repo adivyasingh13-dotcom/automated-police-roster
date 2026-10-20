@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Operational System Reports - Police Roster System{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <h1 class="app-title"><i class="fa-solid fa-file-lines text-navy me-2"></i> Operational System Reports</h1>
+    <p class="app-subtitle">Generate print-ready operational summaries, roster audit reports, and workload indicators</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow-sm border-0 h-100 bg-white">
+            <div class="card-body p-4 text-center">
+                <i class="fa-solid fa-calendar-week fa-3x text-navy mb-3"></i>
+                <h5 class="card-title font-weight-bold">Roster Assignment Report</h5>
+                <p class="card-text text-muted small">Printable duty schedule breakdown by date, shift, and station.</p>
+                <a href="{{ url_for('reports.roster_report') }}" class="btn btn-police-primary btn-sm w-100 mt-2"><i class="fa-solid fa-print me-1"></i> View Roster Report</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow-sm border-0 h-100 bg-white">
+            <div class="card-body p-4 text-center">
+                <i class="fa-solid fa-heart-pulse fa-3x text-danger mb-3"></i>
+                <h5 class="card-title font-weight-bold">Workload-Risk Summary</h5>
+                <p class="card-text text-muted small">Operational workload burden audit and risk breakdown across personnel.</p>
+                <a href="{{ url_for('reports.workload_risk_report') }}" class="btn btn-police-primary btn-sm w-100 mt-2"><i class="fa-solid fa-print me-1"></i> View Risk Report</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow-sm border-0 h-100 bg-white">
+            <div class="card-body p-4 text-center">
+                <i class="fa-solid fa-clock-rotate-left fa-3x text-warning mb-3"></i>
+                <h5 class="card-title font-weight-bold">Overtime Analysis</h5>
+                <p class="card-text text-muted small">Summary of accrued overtime hours per officer across operational periods.</p>
+                <a href="{{ url_for('reports.overtime_report') }}" class="btn btn-police-primary btn-sm w-100 mt-2"><i class="fa-solid fa-print me-1"></i> View Overtime Report</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow-sm border-0 h-100 bg-white">
+            <div class="card-body p-4 text-center">
+                <i class="fa-solid fa-plane-departure fa-3x text-info mb-3"></i>
+                <h5 class="card-title font-weight-bold">Leave Audit Summary</h5>
+                <p class="card-text text-muted small">Approved, pending, and rejected leave history audit report.</p>
+                <a href="{{ url_for('reports.leave_report') }}" class="btn btn-police-primary btn-sm w-100 mt-2"><i class="fa-solid fa-print me-1"></i> View Leave Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

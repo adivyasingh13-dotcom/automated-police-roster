@@ -1,0 +1,223 @@
+/* POLICE ROSTER & WORKLOAD SYSTEM
+   Real-World Professional Administrative Operations Stylesheet */
+
+:root {
+    --navy-primary: #24364B;
+    --navy-secondary: #526579;
+    --bg-body: #F4F5F6;
+    --surface-panel: #FFFFFF;
+    --border-color: #D9DDE2;
+    --text-primary: #263238;
+    --text-secondary: #526579;
+
+    /* Operational Risk & Status Colors */
+    --status-low: #3F7D5A;
+    --status-moderate: #B8872F;
+    --status-high: #B96A3A;
+    --status-critical: #A94442;
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+/* Navbar */
+.navbar-police {
+    background-color: var(--navy-primary);
+    border-bottom: 2px solid var(--navy-secondary);
+    padding: 0.6rem 1rem;
+}
+
+.navbar-police .navbar-brand {
+    color: #FFFFFF;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.navbar-police .nav-link {
+    color: #D9DDE2;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+}
+
+.navbar-police .nav-link:hover,
+.navbar-police .nav-link.active {
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Header Banner */
+.app-header {
+    background-color: var(--surface-panel);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 0;
+    margin-bottom: 1.25rem;
+}
+
+.app-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--navy-primary);
+    margin: 0;
+}
+
+.app-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0.2rem 0 0 0;
+}
+
+/* Metric KPI Cards */
+.card-metric {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.85rem 1rem;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+}
+
+.metric-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--navy-primary);
+    margin-top: 0.15rem;
+}
+
+/* Cards & Panels */
+.card {
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.card-header {
+    background-color: var(--surface-panel);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: var(--navy-primary);
+}
+
+/* Operational Tables */
+.table-police {
+    background-color: var(--surface-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.table-police th {
+    background-color: #ECEEEF;
+    color: var(--navy-primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 2px solid var(--border-color);
+    padding: 0.65rem 0.85rem;
+}
+
+.table-police td {
+    padding: 0.65rem 0.85rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Badges & Status Indicators */
+.badge-risk-low, .badge-low {
+    background-color: var(--status-low) !important;
+    color: #FFFFFF !important;
+}
+
+.badge-risk-moderate, .badge-moderate {
+    background-color: var(--status-moderate) !important;
+    color: #FFFFFF !important;
+}
+
+.badge-risk-high, .badge-high {
+    background-color: var(--status-high) !important;
+    color: #FFFFFF !important;
+}
+
+.badge-risk-critical, .badge-critical {
+    background-color: var(--status-critical) !important;
+    color: #FFFFFF !important;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
+}
+
+.btn-police-primary, .btn-navy {
+    background-color: var(--navy-primary);
+    color: #FFFFFF;
+    border: 1px solid var(--navy-primary);
+}
+
+.btn-police-primary:hover, .btn-navy:hover {
+    background-color: #1A2837;
+    color: #FFFFFF;
+}
+
+.btn-police-secondary {
+    background-color: var(--navy-secondary);
+    color: #FFFFFF;
+    border: 1px solid var(--navy-secondary);
+}
+
+.btn-police-secondary:hover {
+    background-color: #3E4E5F;
+    color: #FFFFFF;
+}
+
+.btn-approve {
+    background-color: var(--status-low);
+    color: #FFFFFF;
+    border: none;
+}
+
+.btn-approve:hover {
+    background-color: #316246;
+    color: #FFFFFF;
+}
+
+.btn-reject {
+    background-color: var(--status-critical);
+    color: #FFFFFF;
+    border: none;
+}
+
+.btn-reject:hover {
+    background-color: #8C3735;
+    color: #FFFFFF;
+}
+
+/* Footer */
+footer {
+    background-color: var(--surface-panel);
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    padding: 0.75rem 0;
+}

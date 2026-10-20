@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Draft Roster Review - Police Roster & Workload System{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="app-title">Draft Roster Review</h1>
+            <p class="app-subtitle">Inspect generated assignments, shortfalls, and projected workload risks prior to publishing.</p>
+        </div>
+        <div>
+            <form method="POST" action="{{ url_for('supervisor.publish_roster_action') }}">
+                <input type="hidden" name="start_date" value="{{ start_date }}">
+                <input type="hidden" name="days" value="{{ days }}">
+                <button type="submit" class="btn btn-approve btn-lg shadow-sm">
+                    <i class="fa-solid fa-check me-2"></i> Publish Roster
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Warning Banners for Staffing Shortfalls -->
+{% if shortfalls %}
+<div class="alert alert-danger border shadow-sm mb-4">
+    <div class="d-flex align-items-center mb-1">
+        <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
+        <strong>Staffing Shortfalls Detected ({% if shortfalls %}{{ shortfalls|length }}{% else %}0{% endif %}):</strong>
+    </div>
+    <ul class="mb-0 ps-4 small">
+        {% for s in shortfalls %}
+        <li><strong>{{ s.date }}:</strong> {{ s.message }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- Warning Banners for High Risk Officers -->
+{% set high_risk_sim = risk_assessments|selectattr('risk_level', 'in', ['HIGH', 'CRITICAL'])|list %}
+{% if high_risk_sim %}
+<div class="alert alert-warning border shadow-sm mb-4">
+    <div class="d-flex align-items-center mb-1">
+        <i class="fa-solid fa-circle-exclamation me-2 fs-5"></i>
+        <strong>Projected Workload Risk Alerts:</strong>
+    </div>
+    <ul class="mb-0 ps-4 small">
+        {% for r in high_risk_sim %}
+        <li>Officer <strong>{{ r.full_name }}</strong> (<code>{{ r.badge_number }}</code>) has projected <span class="badge {{ r.risk_level|risk_badge_class }}">{{ r.risk_level }}</span> risk: {{ r.reasoning }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- Roster Assignments Table -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-navy">Generated Assignments ({{ start_date }} - {{ days }} Days)</h6>
+        <span class="badge bg-secondary">DRAFT MODE</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-police align-middle m-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Shift Name</th>
+                        <th>Type</th>
+                        <th>Assigned Officer</th>
+                        <th>Badge #</th>
+                        <th>Soft Penalty</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asgn in assignments %}
+                    <tr>
+                        <td><strong>{{ asgn.date.strftime('%d %b %Y (%a)') }}</strong></td>
+                        <td>{{ asgn.shift.name }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ asgn.shift.shift_type }}</span></td>
+                        <td>{{ asgn.officer.full_name }}</td>
+                        <td><code>{{ asgn.officer.badge_number }}</code></td>
+                        <td><span class="badge bg-light text-dark border">{{ "%.1f"|format(asgn.penalty_score or 0.0) }} pts</span></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                    onclick="openOverrideModal('{{ asgn.id }}', '{{ asgn.officer.full_name }}', '{{ asgn.shift.name }}', '{{ asgn.date.strftime('%d %b %Y') }}')">
+                                Reassign
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No draft assignments generated yet. Run the Automated Roster Generator.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Reassignment / Supervisor Override Modal -->
+<div class="modal fade" id="overrideModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-navy text-white" style="background-color: #24364B;">
+                <h5 class="modal-title text-white"><i class="fa-solid fa-user-pen me-2"></i> Reassign Officer</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('supervisor.override_assignment') }}">
+                <div class="modal-body">
+                    <input type="hidden" id="overrideAssignmentId" name="assignment_id">
+                    <div class="alert alert-light border mb-3">
+                        <small class="text-muted d-block">Current Assignment:</small>
+                        <strong id="overrideOfficerName" class="text-navy fs-6"></strong><br>
+                        <span id="overrideShiftDetails" class="text-secondary small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="new_officer_id" class="form-label font-weight-bold">Select Replacement Officer *</label>
+                        <select class="form-select" id="new_officer_id" name="new_officer_id" required>
+                            <option value="">-- Choose Replacement Officer --</option>
+                            {% for off in officers %}
+                            <option value="{{ off.id }}">{{ off.full_name }} (Badge: {{ off.badge_number }})</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Hard constraints (11h rest, leave, 48h cap) will be validated upon submission.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="override_reason" class="form-label font-weight-bold">Override Reason</label>
+                        <textarea class="form-control" id="override_reason" name="override_reason" rows="2" placeholder="e.g. Operational replacement"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-police-primary">Validate & Reassign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}My Workload Status - Police Roster System{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <h1 class="app-title"><i class="fa-solid fa-heart-pulse text-navy me-2"></i> Personal Operational Workload Status</h1>
+    <p class="app-subtitle">Overview of your assigned working hours, rest cycles, and operational burden indicators</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-4 text-center bg-white h-100">
+            <h6 class="text-secondary text-uppercase mb-2 font-weight-bold">Current Risk Evaluation</h6>
+            <div class="my-3">
+                <span class="badge {{ assessment.risk_level|risk_badge_class }} fs-4 px-4 py-2">{{ assessment.risk_level }}</span>
+            </div>
+            <p class="text-muted small mb-0">{{ assessment.reasoning }}</p>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 bg-white h-100 p-4">
+            <h6 class="text-navy font-weight-bold mb-3 border-bottom pb-2">Recent 7-Day Operational Metrics Breakdown</h6>
+            <div class="row text-center g-3">
+                <div class="col-6 col-sm-3">
+                    <div class="p-3 bg-light rounded border">
+                        <small class="text-muted d-block">Total Hours</small>
+                        <strong class="fs-4 text-navy">{{ "%.1f"|format(assessment.total_hours) }}h</strong>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="p-3 bg-light rounded border">
+                        <small class="text-muted d-block">Overtime Hours</small>
+                        <strong class="fs-4 text-warning">{{ "%.1f"|format(assessment.overtime_hours) }}h</strong>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="p-3 bg-light rounded border">
+                        <small class="text-muted d-block">Consecutive Days</small>
+                        <strong class="fs-4 text-navy">{{ assessment.consecutive_days }}</strong>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="p-3 bg-light rounded border">
+                        <small class="text-muted d-block">Night Shifts</small>
+                        <strong class="fs-4 text-navy">{{ assessment.night_shifts_count }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historical Workload Assessments -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-bottom py-3">
+        <h6 class="m-0 font-weight-bold text-navy"><i class="fa-solid fa-history me-2"></i> Recent Workload Risk Assessment History</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-police align-middle m-0">
+                <thead>
+                    <tr>
+                        <th>Assessment Date</th>
+                        <th>Weekly Hours</th>
+                        <th>Consecutive Days</th>
+                        <th>Night Shifts</th>
+                        <th>Emergency Duties</th>
+                        <th>Evaluated Risk</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in history %}
+                    <tr>
+                        <td><strong>{{ h.assessment_date.strftime('%d %b %Y') }}</strong></td>
+                        <td>{{ "%.1f"|format(h.total_hours) }}h</td>
+                        <td>{{ h.consecutive_days }} days</td>
+                        <td>{{ h.night_shifts_count }}</td>
+                        <td>{{ h.emergency_duties_count }}</td>
+                        <td><span class="badge {{ h.risk_level|risk_badge_class }}">{{ h.risk_level }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">No historical workload assessments logged.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

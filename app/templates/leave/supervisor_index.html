@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Leave Requests - Police Roster & Workload System{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <h1 class="app-title">Leave Requests</h1>
+    <p class="app-subtitle">Review officer leave applications. Approved leave acts as a strict scheduling constraint.</p>
+</div>
+
+<!-- Pending Leave Requests Table -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white border-bottom py-3">
+        <h6 class="m-0 font-weight-bold text-navy">Pending Requests ({% if pending_requests %}{{ pending_requests|length }}{% else %}0{% endif %})</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-police align-middle m-0">
+                <thead>
+                    <tr>
+                        <th>Officer</th>
+                        <th>Badge #</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Reason</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in pending_requests %}
+                    <tr>
+                        <td><strong>{{ req.officer.full_name }}</strong></td>
+                        <td><code>{{ req.officer.badge_number }}</code></td>
+                        <td>{{ req.start_date.strftime('%d %b %Y') }}</td>
+                        <td>{{ req.end_date.strftime('%d %b %Y') }}</td>
+                        <td>{{ req.reason or 'No reason provided' }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('supervisor.leave_management') }}" class="d-inline">
+                                <input type="hidden" name="request_id" value="{{ req.id }}">
+                                <button type="submit" name="action" value="APPROVE" class="btn btn-approve btn-sm px-3 me-1">Approve</button>
+                                <button type="submit" name="action" value="REJECT" class="btn btn-reject btn-sm px-3">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">No pending leave requests.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Historical Leave Records -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-bottom py-3">
+        <h6 class="m-0 font-weight-bold text-navy">Reviewed Leave History</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-police align-middle m-0">
+                <thead>
+                    <tr>
+                        <th>Officer</th>
+                        <th>Badge #</th>
+                        <th>Dates</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Reviewed Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in approved_requests %}
+                    <tr>
+                        <td><strong>{{ req.officer.full_name }}</strong></td>
+                        <td><code>{{ req.officer.badge_number }}</code></td>
+                        <td>{{ req.start_date.strftime('%d %b') }} – {{ req.end_date.strftime('%d %b %Y') }}</td>
+                        <td>{{ req.reason }}</td>
+                        <td><span class="badge bg-success">APPROVED</span></td>
+                        <td><small class="text-muted">{{ req.reviewed_at.strftime('%d %b %Y') if req.reviewed_at else 'N/A' }}</small></td>
+                    </tr>
+                    {% endfor %}
+
+                    {% for req in rejected_requests %}
+                    <tr>
+                        <td><strong>{{ req.officer.full_name }}</strong></td>
+                        <td><code>{{ req.officer.badge_number }}</code></td>
+                        <td>{{ req.start_date.strftime('%d %b') }} – {{ req.end_date.strftime('%d %b %Y') }}</td>
+                        <td>{{ req.reason }}</td>
+                        <td><span class="badge bg-danger">REJECTED</span></td>
+                        <td><small class="text-muted">{{ req.reviewed_at.strftime('%d %b %Y') if req.reviewed_at else 'N/A' }}</small></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Apply for Leave - Police Roster System{% endblock %}
+
+{% block content %}
+<div class="app-header">
+    <h1 class="app-title"><i class="fa-solid fa-plane-departure text-navy me-2"></i> Officer Leave Portal</h1>
+    <p class="app-subtitle">Submit leave applications and track leave request status</p>
+</div>
+
+<div class="row g-4">
+    <!-- Apply for Leave Form -->
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-navy text-white py-3" style="background-color: #243447;">
+                <h6 class="m-0 text-white"><i class="fa-solid fa-pen-to-square me-1"></i> Submit Leave Request</h6>
+            </div>
+            <div class="card-body p-4 bg-white">
+                <form method="POST" action="{{ url_for('officer.leave') }}">
+                    <div class="mb-3">
+                        <label for="start_date" class="form-label font-weight-bold">Leave Start Date *</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="end_date" class="form-label font-weight-bold">Leave End Date *</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reason" class="form-label font-weight-bold">Reason for Leave *</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Provide reason for absence..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-police-primary w-100 py-2">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Submit Application
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Leave History Table -->
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="m-0 font-weight-bold text-navy"><i class="fa-solid fa-clock-rotate-left me-2"></i> My Leave History</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-police align-middle m-0">
+                        <thead>
+                            <tr>
+                                <th>Submitted Date</th>
+                                <th>Leave Dates</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for l in my_leaves %}
+                            <tr>
+                                <td><small class="text-muted">{{ l.created_at.strftime('%d %b %Y') }}</small></td>
+                                <td><strong>{{ l.start_date.strftime('%d %b %Y') }}</strong> to <strong>{{ l.end_date.strftime('%d %b %Y') }}</strong></td>
+                                <td>{{ l.reason }}</td>
+                                <td>
+                                    {% if l.status == 'APPROVED' %}
+                                        <span class="badge bg-success">APPROVED</span>
+                                    {% elif l.status == 'REJECTED' %}
+                                        <span class="badge bg-danger">REJECTED</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">PENDING</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">You have no submitted leave requests.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - Police Roster & Workload System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-navy text-white text-center py-3" style="background-color: #24364B;">
+                <h5 class="mb-0 text-white font-weight-bold"><i class="fa-solid fa-shield-halved me-2"></i> System Sign In</h5>
+                <small class="text-white-50">Police Roster & Workload System</small>
+            </div>
+            <div class="card-body p-4 bg-white">
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label font-weight-bold">Username or Email</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Username" required autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label font-weight-bold">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                        <label class="form-check-label text-secondary" for="remember">Remember session</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-police-primary w-100 py-2">
+                        Sign In
+                    </button>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3">
+                <small class="text-muted d-block mb-1"><strong>Demo Accounts:</strong></small>
+                <small class="text-muted d-block">Admin: <code>admin</code> / <code>admin123</code></small>
+                <small class="text-muted d-block">Supervisor: <code>supervisor</code> / <code>super123</code></small>
+                <small class="text-muted d-block">Officer: <code>officer1</code> / <code>officer123</code></small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

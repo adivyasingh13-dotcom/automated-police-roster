@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Personnel Leave Audit Report{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center my-3 d-print-none">
+    <div>
+        <h4 class="m-0 font-weight-bold text-navy"><i class="fa-solid fa-plane-departure me-2"></i> Personnel Leave Audit Report</h4>
+        <small class="text-muted">Approved, Pending, and Rejected Leave Applications</small>
+    </div>
+    <button onclick="window.print()" class="btn btn-navy btn-sm"><i class="fa-solid fa-print me-1"></i> Print / Export PDF</button>
+</div>
+
+<div class="card shadow-sm border-0 p-4 bg-white">
+    <div class="text-center mb-4 border-bottom pb-3">
+        <h4 class="font-weight-bold text-navy">POLICE PERSONNEL LEAVE SUMMARY REPORT</h4>
+    </div>
+
+    <table class="table table-bordered table-striped align-middle">
+        <thead>
+            <tr class="table-dark">
+                <th>Officer Name</th>
+                <th>Badge #</th>
+                <th>Leave Start Date</th>
+                <th>Leave End Date</th>
+                <th>Reason</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for l in leaves %}
+            <tr>
+                <td><strong>{{ l.officer.full_name }}</strong></td>
+                <td><code>{{ l.officer.badge_number }}</code></td>
+                <td>{{ l.start_date.strftime('%d %b %Y') }}</td>
+                <td>{{ l.end_date.strftime('%d %b %Y') }}</td>
+                <td>{{ l.reason }}</td>
+                <td><span class="badge {{ l.status|status_badge_class }}">{{ l.status }}</span></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center py-4 text-muted">No leave records registered.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

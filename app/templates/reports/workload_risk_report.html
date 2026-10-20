@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Operational Workload-Risk Audit Report{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center my-3 d-print-none">
+    <div>
+        <h4 class="m-0 font-weight-bold text-navy"><i class="fa-solid fa-heart-pulse me-2"></i> Operational Workload-Risk Audit Report</h4>
+        <small class="text-muted">Assessment Date: {{ today.strftime('%d %b %Y') }}</small>
+    </div>
+    <button onclick="window.print()" class="btn btn-navy btn-sm"><i class="fa-solid fa-print me-1"></i> Print / Export PDF</button>
+</div>
+
+<div class="card shadow-sm border-0 p-4 bg-white">
+    <div class="text-center mb-4 border-bottom pb-3">
+        <h4 class="font-weight-bold text-navy">POLICE PERSONNEL WORKLOAD RISK AUDIT REPORT</h4>
+        <p class="mb-0 text-secondary">Operational Scheduling & Workload Assessment Summary</p>
+    </div>
+
+    <table class="table table-bordered table-striped align-middle">
+        <thead>
+            <tr class="table-dark">
+                <th>Badge #</th>
+                <th>Officer Name</th>
+                <th>Weekly Hours</th>
+                <th>Overtime</th>
+                <th>Consecutive Days</th>
+                <th>Night Shifts</th>
+                <th>Emergency Duties</th>
+                <th>Evaluated Risk Level</th>
+                <th>Operational Reasoning</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in assessments %}
+            <tr>
+                <td><code>{{ a.officer.badge_number }}</code></td>
+                <td><strong>{{ a.officer.full_name }}</strong></td>
+                <td>{{ "%.1f"|format(a.total_hours) }}h</td>
+                <td>{{ "%.1f"|format(a.overtime_hours) }}h</td>
+                <td>{{ a.consecutive_days }} d</td>
+                <td>{{ a.night_shifts_count }}</td>
+                <td>{{ a.emergency_duties_count }}</td>
+                <td><span class="badge {{ a.risk_level|risk_badge_class }}">{{ a.risk_level }}</span></td>
+                <td><small>{{ a.reasoning }}</small></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9" class="text-center py-4 text-muted">No assessment records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

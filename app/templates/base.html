@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Police Roster & Workload System{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Primary Operational Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-police shadow-sm">
+        <div class="container-fluid px-3">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <i class="fa-solid fa-shield-halved me-2 text-warning"></i>
+                <span>POLICE ROSTER & WORKLOAD SYSTEM</span>
+            </a>
+            <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                {% if current_user.is_authenticated %}
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
+                    {% if current_user.role == 'ADMIN' %}
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'officer' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.officers_list') }}">Officers</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.departments' %}active{% endif %}" href="{{ url_for('admin.departments') }}">Stations</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.shifts' %}active{% endif %}" href="{{ url_for('admin.shifts') }}">Shifts</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'reports' in request.endpoint %}active{% endif %}" href="{{ url_for('reports.index') }}">Reports</a></li>
+                    {% elif current_user.role == 'SUPERVISOR' %}
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'supervisor.dashboard' %}active{% endif %}" href="{{ url_for('supervisor.dashboard') }}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'roster' in request.endpoint %}active{% endif %}" href="{{ url_for('supervisor.generate_roster') }}">Generate Roster</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'leave' in request.endpoint %}active{% endif %}" href="{{ url_for('supervisor.leave_management') }}">Leave Requests</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'workload' in request.endpoint %}active{% endif %}" href="{{ url_for('supervisor.workload_dashboard') }}">Workload Risk</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'attendance' in request.endpoint %}active{% endif %}" href="{{ url_for('attendance.index') }}">Attendance</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'emergency' in request.endpoint %}active{% endif %}" href="{{ url_for('supervisor.emergency_duties') }}">Emergency Duty</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'reports' in request.endpoint %}active{% endif %}" href="{{ url_for('reports.index') }}">Reports</a></li>
+                    {% elif current_user.role == 'OFFICER' %}
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'officer.dashboard' %}active{% endif %}" href="{{ url_for('officer.dashboard') }}">My Schedule</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'officer.leave' %}active{% endif %}" href="{{ url_for('officer.leave') }}">Leave Application</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'officer.workload' %}active{% endif %}" href="{{ url_for('officer.workload') }}">Workload Status</a></li>
+                    {% endif %}
+                </ul>
+
+                <div class="d-flex align-items-center text-white">
+                    <span class="badge bg-secondary me-3">{{ current_user.role }}</span>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle text-white btn-sm" type="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-user me-1"></i> {{ current_user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}"><i class="fa-solid fa-key me-2"></i> Account Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-right-from-bracket me-2"></i> Sign Out</a></li>
+                        </ul>
+                    </div>
+                </div>
+                {% else %}
+                <div class="ms-auto">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-right-to-bracket me-1"></i> Sign In</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Feedback Alerts -->
+    <div class="container-fluid px-3 mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show border" role="alert">
+                        {% if category == 'danger' %}<i class="fa-solid fa-circle-exclamation me-2"></i>{% endif %}
+                        {% if category == 'success' %}<i class="fa-solid fa-circle-check me-2"></i>{% endif %}
+                        {% if category == 'info' %}<i class="fa-solid fa-circle-info me-2"></i>{% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="container-fluid px-3 mb-5">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Unified Operational Footer -->
+    <footer class="footer mt-auto py-2 bg-white border-top text-center text-muted">
+        <div class="container">
+            <span>Police Roster & Workload System &copy; 2026</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/roster.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
